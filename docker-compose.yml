@@ -16,46 +16,75 @@ services:
 
 # TODO добавить сервисы
 
-cars-service:
-    build:
-      context: .
-      dockerfile: Dockerfile.cars
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 15s
+      timeout: 15s
+      retries: 10
+
+  cars-service:
+    build: src/cars_service
+    container_name: cars_service
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
-      PORT: "8070"
+      DATA_BASE_PORT: "5432"
+      DATA_BASE_NAME: "cars"
+      DATA_BASE_USER: "program"
+      DATA_BASE_PASS: "test"
+      DATA_BASE_HOST: "postgres"
     ports:
       - "8070:8070"
 
-rental-service:
-  build:
-    context: .
-    dockerfile: Dockerfile.rental
-  environment:
-    PORT: "8060"
-  ports:
-    - "8060:8060"
 
-payment-service:
-  build:
-    context: .
-    dockerfile: Dockerfile.payment
-  environment:
-    PORT: "8050"
-  ports:
-    - "8050:8050"
+  payment-service:
+    build: src/payment_service
+    container_name: payment_service
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATA_BASE_PORT: "5432"
+      DATA_BASE_NAME: "payments"
+      DATA_BASE_USER: "program"
+      DATA_BASE_PASS: "test"
+      DATA_BASE_HOST: "postgres"
+    ports:
+      - "8050:8050"
 
-gateway-service:
-  build:
-    context: .
-    dockerfile: Dockerfile.gateway
-  environment:
-    PORT: "8080"
-  ports:
-    - "8080:8080"
-  depends_on:
-    - cars-service
-    - rental-service
-    - payment-service
+  rental-service:
+    build: src/rental_service
+    container_name: rental_service
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATA_BASE_PORT: "5432"
+      DATA_BASE_NAME: "rentals"
+      DATA_BASE_USER: "program"
+      DATA_BASE_PASS: "test"
+      DATA_BASE_HOST: "postgres"
+    ports:
+      - "8060:8060"
 
+  gateway-service:
+    build: src/gateway_service
+    container_name: gateway_service
+    depends_on:
+      - cars-service
+      - payment-service
+      - rental-service
+    environment:
+      CARS_SERVICE_HOST: "cars-service"
+      CARS_SERVICE_PORT: "8070"
+      PAYMENT_SERVICE_HOST: "payment-service"
+      PAYMENT_SERVICE_PORT: "8050"
+      RENTAL_SERVICE_HOST: "rental-service"
+      RENTAL_SERVICE_PORT: "8060"
+
+    ports:
+      - "8080:8080"
 
 volumes:
   db-data:
