@@ -12,9 +12,7 @@ services:
       - db-data:/var/lib/postgresql/data
       - ./postgres/:/docker-entrypoint-initdb.d/
     ports:
-      - "5432:5432"
-
-# TODO добавить сервисы
+      - "5000:5432"
 
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
@@ -22,7 +20,7 @@ services:
       timeout: 15s
       retries: 10
 
-  cars-service:
+  cars_service:
     build: src/cars_service
     container_name: cars_service
     depends_on:
@@ -37,8 +35,7 @@ services:
     ports:
       - "8070:8070"
 
-
-  payment-service:
+  payment_service:
     build: src/payment_service
     container_name: payment_service
     depends_on:
@@ -53,7 +50,7 @@ services:
     ports:
       - "8050:8050"
 
-  rental-service:
+  rental_service:
     build: src/rental_service
     container_name: rental_service
     depends_on:
@@ -68,19 +65,19 @@ services:
     ports:
       - "8060:8060"
 
-  gateway-service:
+  gateway_service:
     build: src/gateway_service
     container_name: gateway_service
     depends_on:
-      - cars-service
-      - payment-service
-      - rental-service
+      - cars_service
+      - payment_service
+      - rental_service
     environment:
-      CARS_SERVICE_HOST: "cars-service"
+      CARS_SERVICE_HOST: "cars_service"
       CARS_SERVICE_PORT: "8070"
-      PAYMENT_SERVICE_HOST: "payment-service"
+      PAYMENT_SERVICE_HOST: "payment_service"
       PAYMENT_SERVICE_PORT: "8050"
-      RENTAL_SERVICE_HOST: "rental-service"
+      RENTAL_SERVICE_HOST: "rental_service"
       RENTAL_SERVICE_PORT: "8060"
 
     ports:
