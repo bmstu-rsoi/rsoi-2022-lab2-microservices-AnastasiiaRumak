@@ -21,7 +21,7 @@ services:
       retries: 10
 
   cars_service:
-    build: src/cars_service
+    build: app/cars
     container_name: cars_service
     depends_on:
       postgres:
@@ -36,7 +36,7 @@ services:
       - "8070:8070"
 
   payment_service:
-    build: src/payment_service
+    build: app/payment
     container_name: payment_service
     depends_on:
       postgres:
@@ -51,7 +51,7 @@ services:
       - "8050:8050"
 
   rental_service:
-    build: src/rental_service
+    build: app/rental
     container_name: rental_service
     depends_on:
       postgres:
@@ -66,7 +66,7 @@ services:
       - "8060:8060"
 
   gateway_service:
-    build: src/gateway_service
+    build: app/gateway
     container_name: gateway_service
     depends_on:
       - cars_service
